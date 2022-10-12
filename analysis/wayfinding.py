@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import sqrt
 import csv
+from pathlib import Path
 
 import pandas as pd
 
@@ -47,6 +48,7 @@ class Wayfinding:
     def __init__(self):
         self.data = {}
         self.shortcuts = {}
+        self.path = None
 
     def get_shortcut(self, a, b):
         if a in self.shortcuts and b in self.shortcuts[a]:
@@ -56,16 +58,27 @@ class Wayfinding:
         else:
             return None
 
-    def import_everything(self, path):
-        files = os.listdir(path)
+    def import_everything(self, path: Path):
+        files = os.listdir(path / "data")
+        self.path = path
 
         # loop through the files and import each file as csv file with delimiter ';'
         for file in files:
+
+            print("Importing", file)
+
+            # if the file is not csv continue
+            if not file.endswith(".txt"):
+                continue
+
             # get file name
             filename = os.fsdecode(file)
-            self.data[filename] = np.genfromtxt('data/' + file, delimiter=';')
 
-        with open('shortcuts_fixed.csv', 'r') as f:
+            # get the joined path and filename
+            joined_path = path / f"data/{filename}"
+            self.data[filename] = np.genfromtxt(joined_path, delimiter=';')
+
+        with open(path / 'shortcuts_fixed.csv', 'r') as f:
             reader = csv.reader(f, delimiter=',')
             next(reader)
             for row in reader:
@@ -74,7 +87,9 @@ class Wayfinding:
                 self.shortcuts[row[0]][row[1]] = float(row[2])
 
     def analyze_all_subject(self, plot=True):
-        df = pd.DataFrame(columns=["ParticipantID", "To Tobler Museum", "To Snow Church", "To Lynch Station", "To Harvey House", "To Saucer Center", "To Golledge Hall", "To Harris Hall", "To Batty House"])
+        df = pd.DataFrame(
+            columns=["ParticipantID", "To Tobler Museum", "To Snow Church", "To Lynch Station", "To Harvey House",
+                     "To Saucer Center", "To Golledge Hall", "To Harris Hall", "To Batty House"])
         # loop through all subjects
         for subject in self.data:
             self.analyze_subject(subject, plot, df=df)
@@ -159,7 +174,7 @@ class Wayfinding:
             fig, ax = plt.subplots(sqrt_fig_number + 1, sqrt_fig_number + 1)
 
             # load the image "images/silcton_cropped.jpg"
-            img = plt.imread('images/silcton_cropped.jpg')
+            img = plt.imread(self.path / 'images/silcton_cropped.jpg')
 
             # rotate the image by 180 degrees
             img = np.rot90(img, 2)
@@ -174,7 +189,6 @@ class Wayfinding:
 
         distances = [name]
         efficiencies = [name]
-
 
         path_distances = []
         for i in range(len(indices) - 1):

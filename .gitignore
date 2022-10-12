@@ -1,2 +1,11 @@
 # Project exclude paths
 /data/
+/.idea/csv-plugin.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/other.xml
+/notebooks/output.csv
+/output.csv
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/vcs.xml
+/.idea/VirtualSilctonAnalysis.iml
